@@ -3,193 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generic Website</title>
+    <title>Generic Website - Interactive</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         :root {
             --bg: #ffffff;
             --text: #000000;
             --secondary: #666666;
             --border: #eeeeee;
-            --accent: #0070f3; /* Clean Blue */
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --accent: #0070f3;
+            --transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* LOW GRAPHICS MODE */
+        body.low-graphics * {
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            font-family: 'Courier New', Courier, monospace !important;
+            letter-spacing: 0px !important;
+            filter: contrast(150%) brightness(110%);
+        }
+        body.low-graphics .content-box { border: 4px solid black; }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            line-height: 1.5;
-            overflow-x: hidden;
+            overflow: hidden; /* Prevent scroll during physics */
+            height: 100vh;
         }
 
         /* --- NAVIGATION --- */
         nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            position: fixed; top: 0; width: 100%; z-index: 100;
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 5%;
+            display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%;
+        }
+        .logo { font-size: 1.1rem; font-weight: 700; text-transform: uppercase; cursor: pointer; }
+        #cmd-trigger { cursor: pointer; font-weight: 500; color: var(--accent); transition: var(--transition); }
+
+        /* --- MAIN CONTENT (TO BE SHATTERED) --- */
+        #physics-container { width: 100%; height: 100vh; position: relative; }
+        .phy-obj { position: absolute; background: white; pointer-events: none; }
+        
+        header { padding: 15vh 5%; }
+        h1 { font-size: clamp(3rem, 10vw, 6rem); font-weight: 800; letter-spacing: -3px; line-height: 0.9; }
+        
+        .section { padding: 2rem 5%; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .content-box { padding: 2rem; border: 1px solid var(--border); border-radius: 8px; }
+
+        /* --- COMMAND BAR --- */
+        #command-bar {
+            position: fixed; bottom: -100px; left: 0; width: 100%;
+            height: 80px; background: white; border-top: 2px solid var(--text);
+            display: flex; align-items: center; padding: 0 5%;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 200;
+        }
+        #command-bar.active { transform: translateY(-100px); }
+
+        #command-input {
+            width: 100%; padding: 15px; border: 1px solid var(--border);
+            font-size: 1.1rem; outline: none;
         }
 
-        .logo {
-            font-size: 1.1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
+        /* COMMAND LIST POPUP */
+        #cmd-list {
+            position: absolute; bottom: 90px; left: 5%; background: black;
+            color: white; padding: 1rem; border-radius: 8px; display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
+        #cmd-list ul { list-style: none; }
+        #cmd-list li { padding: 5px 0; font-family: monospace; opacity: 0.8; }
+        #cmd-list.active { display: block; }
 
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--secondary);
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: var(--transition);
-        }
-
-        .nav-links a:hover {
-            color: var(--text);
-        }
-
-        /* --- HERO --- */
-        header {
-            padding: 15vh 5%;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .tag {
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: var(--secondary);
-            margin-bottom: 1rem;
-            display: block;
-        }
-
-        h1 {
-            font-size: clamp(3rem, 10vw, 6rem);
-            font-weight: 800;
-            line-height: 0.9;
-            letter-spacing: -3px;
-            margin-bottom: 2rem;
-        }
-
-        /* --- CONTENT SECTION --- */
-        .section {
-            padding: 5rem 5%;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .content-box {
-            padding: 2rem;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            transition: var(--transition);
-            cursor: pointer;
-        }
-
-        .content-box:hover {
-            border-color: var(--text);
-            transform: translateY(-5px);
-        }
-
-        .interactive-btn {
-            display: inline-block;
-            margin-top: 2rem;
-            padding: 1rem 2rem;
-            background: var(--text);
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            border-radius: 2px;
-            transition: var(--transition);
-        }
-
-        .interactive-btn:hover {
-            background: var(--accent);
-            padding-right: 3rem;
-        }
-
-        /* --- FOOTER --- */
-        footer {
-            padding: 2rem 5%;
-            font-size: 0.8rem;
-            color: var(--secondary);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        @media (max-width: 768px) {
-            .section { grid-template-columns: 1fr; }
-            h1 { letter-spacing: -1px; }
-            .nav-links { display: none; } /* Mobile simplicity */
-        }
+        canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="logo" onclick="location.reload()">Generic Website</div>
-        <div class="nav-links">
-            <a href="#">Link One</a>
-            <a href="#">Link Two</a>
-            <a href="#">Link Three</a>
-            <a href="#" style="color: var(--accent)">Special Link</a>
-        </div>
+        <div class="logo">Generic Website</div>
+        <div id="cmd-trigger">Generic Command Bar</div>
     </nav>
 
-    <header>
-        <span class="tag">Standard Header Component</span>
-        <h1>This is a very <br>large heading.</h1>
-        <p style="max-width: 500px; color: var(--secondary);">
-            This website contains standard elements organized in a predictable manner for your viewing convenience. 
-        </p>
-        <a href="#" class="interactive-btn" id="mainButton">Click for Action</a>
-    </header>
+    <div id="physics-container">
+        <header class="phy-node" data-type="text">
+            <h1>This is a very<br>large heading.</h1>
+        </header>
 
-    <div class="section">
-        <div class="content-box">
-            <h3>Standard Box A</h3>
-            <p>This box contains some descriptive text about a feature that is likely very common.</p>
-        </div>
-        <div class="content-box">
-            <h3>Standard Box B</h3>
-            <p>This box is identical to the first one, maintaining a consistent and generic aesthetic.</p>
+        <div class="section">
+            <div class="content-box phy-node" data-type="box">
+                <h3>Standard Box A</h3>
+                <p>Generic feature description goes here.</p>
+            </div>
+            <div class="content-box phy-node" data-type="box">
+                <h3>Standard Box B</h3>
+                <p>Identical feature for consistency.</p>
+            </div>
         </div>
     </div>
 
-    <footer>
-        <div>© 2026 Generic Website Corp.</div>
-        <div>Privacy / Terms / Whatever</div>
-    </footer>
+    <div id="command-bar">
+        <div id="cmd-list">
+            <ul>
+                <li>/physics - Enable Gravity</li>
+                <li>/ZeroG - Float Mode</li>
+                <li>/LowGraphic - Pixel Mode</li>
+                <li>/meteor - Destructive Event</li>
+            </ul>
+        </div>
+        <input type="text" id="command-input" placeholder="type here..." autocomplete="off">
+    </div>
 
     <script>
-        // A little hint of interactivity to start
-        const btn = document.getElementById('mainButton');
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            btn.textContent = "Action Performed";
-            setTimeout(() => {
-                btn.textContent = "Click for Action";
-            }, 2000);
-        });
-    </script>
+        const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint, Events } = Matter;
+        
+        // Setup Engine
+        const engine = Engine.create();
+        const world = engine.world;
+        engine.gravity.y = 0; // Start with no gravity
 
+        // Trigger Command Bar
+        const trigger = document.getElementById('cmd-trigger');
+        const bar = document.getElementById('command-bar');
+        const input = document.getElementById('command-input');
+        const list = document.getElementById('cmd-list');
+
+        trigger.addEventListener('click', () => {
+            bar.classList.toggle('active');
+            input.focus();
+            // If text has fallen, clicking trigger "pushes" them
+            if(engine.gravity.y > 0) pushEverythingUp();
+        });
+
+        input.addEventListener('focus', () => list.classList.add('active'));
+        input.addEventListener('blur', () => setTimeout(() => list.classList.remove('active'), 200));
+
+        // Physics Initialization
+        let hasShattered = false;
+        function shatter() {
+            if(hasShattered) return;
+            hasShattered = true;
+
+            const nodes = document.querySelectorAll('.phy-node');
+            nodes.forEach(node => {
+                const rect = node.getBoundingClientRect();
+                const body = Bodies.rectangle(
+                    rect.left + rect.width/2,
+                    rect.top + rect.height/2,
+                    rect.width,
+                    rect.height,
+                    { frictionAir: 0.05, restitution: 0.6 }
+                );
+                
+                // Link DOM to Physics
+                Composite.add(world, body);
+                
+                // Render loop to move DOM elements
+                (function update() {
+                    node.style.transform = `translate(${body.position.x - rect.left - rect.width/2}px, ${body.position.y - rect.top - rect.height/2}px) rotate(${body.angle}rad)`;
+                    requestAnimationFrame(update);
+                })();
+            });
+
+            // Add Ground
+            const ground = Bodies.rectangle(window.innerWidth/2, window.innerHeight, window.innerWidth, 60, { isStatic: true });
+            Composite.add(world, ground);
+
+            // Add Mouse Control (Pickup and Drag)
+            const mouse = Mouse.create(document.body);
+            const mouseConstraint = MouseConstraint.create(engine, { mouse: mouse });
+            Composite.add(world, mouseConstraint);
+
+            Runner.run(engine);
+        }
+
+        function pushEverythingUp() {
+            const bodies = Composite.allBodies(world);
+            bodies.forEach(body => {
+                if(!body.isStatic) {
+                    Matter.Body.applyForce(body, body.position, { x: 0, y: -0.5 });
+                }
+            });
+        }
+
+        // Command Logic
+        input.addEventListener('keydown', (e) => {
+            if(e.key === 'Enter') {
+                const cmd = input.value.toLowerCase();
+                if(cmd === '/physics') {
+                    shatter();
+                    engine.gravity.y = 1;
+                } else if(cmd === '/zerog') {
+                    shatter();
+                    engine.gravity.y = 0;
+                } else if(cmd === '/lowgraphic') {
+                    document.body.classList.toggle('low-graphics');
+                } else if(cmd === '/meteor') {
+                    spawnMeteor();
+                }
+                input.value = '';
+            }
+        });
+
+        function spawnMeteor() {
+            shatter();
+            const meteor = Bodies.circle(Math.random() * window.innerWidth, -100, 40, {
+                density: 0.5,
+                render: { fillStyle: 'red' }
+            });
+            // Visual for meteor
+            const mDiv = document.createElement('div');
+            mDiv.innerHTML = "METEOR";
+            mDiv.style.cssText = "position:fixed; background:black; color:white; padding:10px; font-weight:bold; z-index:50;";
+            document.body.appendChild(mDiv);
+
+            Composite.add(world, meteor);
+            Matter.Body.setVelocity(meteor, { x: (Math.random() - 0.5) * 20, y: 25 });
+
+            (function updateMeteor() {
+                mDiv.style.left = `${meteor.position.x - 30}px`;
+                mDiv.style.top = `${meteor.position.y - 15}px`;
+                mDiv.style.transform = `rotate(${meteor.angle}rad)`;
+                requestAnimationFrame(updateMeteor);
+            })();
+        }
+    </script>
 </body>
 </html>
