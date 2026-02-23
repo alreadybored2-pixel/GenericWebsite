@@ -4,212 +4,487 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generic Website</title>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+
     <style>
+        /* 2. The Style System (CSS) */
         :root {
             --bg: #ffffff;
-            --text: #000000;
-            --secondary: #666666;
-            --border: #eeeeee;
-            --accent: #0070f3;
-            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --text: #111111;
+            --accent: #0070f3; /* Vercel-style Blue */
+            --gray: #666666;
+            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* 1. Reset & Metadata Style */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Global Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Typography */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
+            line-height: 1.6;
             overflow-x: hidden;
-            height: 100vh;
+            transition: all 0.4s var(--bezier);
         }
 
-        /* Low Graphics Mode Class */
-        .low-graphics * {
-            border-radius: 0 !important;
-            image-rendering: pixelated;
-            font-family: monospace !important;
-            box-shadow: none !important;
-        }
-
-        /* 2. Navigation Bar (Glassmorphism) */
+        /* 3. Navigation Bar Components */
         nav {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 5%;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px); /* Glassmorphism */
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* The New Command Bar Trigger */
+        .cmd-trigger {
+            font-weight: 500;
+            color: var(--gray);
+            cursor: pointer;
+            transition: color 0.4s var(--bezier);
+            user-select: none;
+        }
+
+        .cmd-trigger:hover {
+            color: var(--accent);
+        }
+
+        /* 4. Layout & Content Elements */
+        header {
+            padding: 15vh 5%;
+            text-align: center;
+        }
+
+        .category-tag {
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            color: var(--gray);
+            font-weight: 600;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            letter-spacing: -3px;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            padding: 0 5% 10vh;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Media Queries for Mobile */
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr; /* Stacks to 1 column */
+            }
+        }
+
+        .box {
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            background: #fafafa;
+            transition: transform 0.4s var(--bezier), box-shadow 0.4s var(--bezier);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .box:hover {
+            transform: translateY(-8px); /* Lifts on hover */
+            box-shadow: 0 12px 24px rgba(0,0,0,0.05);
+        }
+
+        button {
+            background-color: var(--text);
+            color: var(--bg);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.4s var(--bezier), transform 0.4s var(--bezier);
+        }
+
+        button:hover {
+            background-color: var(--accent);
+        }
+
+        footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 2rem 5%;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        /* --- NEW: BOTTOM COMMAND BAR STYLES --- */
+        #bottomBar {
             position: fixed;
-            top: 0; width: 100%; z-index: 1000;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 1rem 5%;
+            bottom: -250px; /* Hidden by default */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 16px 16px 0 0;
+            padding: 20px;
+            transition: bottom 0.6s var(--bezier); /* Smooth ease-out slide in */
+            z-index: 9999;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
         }
-        .logo { font-size: 1.1rem; font-weight: 700; text-transform: uppercase; cursor: pointer; }
-        
-        /* Command Bar Trigger */
-        .cmd-trigger { 
-            color: var(--accent); font-weight: 600; cursor: pointer; transition: var(--transition); 
-        }
-        .cmd-trigger:hover { letter-spacing: 1px; }
 
-        /* 3. Layout Elements */
-        header { padding: 15vh 5% 5vh; }
-        .tag { font-size: 0.8rem; font-weight: 600; color: var(--secondary); text-transform: uppercase; }
-        h1 { font-size: clamp(3rem, 10vw, 6rem); font-weight: 800; letter-spacing: -3px; line-height: 0.9; }
-        
-        .section { padding: 2rem 5%; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-        .content-box { 
-            padding: 2rem; border: 1px solid var(--border); border-radius: 4px; 
-            background: white; transition: var(--transition); 
+        #bottomBar.visible {
+            bottom: 0;
         }
-        .content-box:hover { transform: translateY(-5px); border-color: var(--text); }
-
-        /* 4. Command Bar (Bottom Slide-in) */
-        #commandBar {
-            position: fixed; bottom: -100px; left: 0; width: 100%;
-            height: 80px; background: white; border-top: 1px solid var(--text);
-            display: flex; align-items: center; padding: 0 5%;
-            transition: bottom 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-            z-index: 2000;
-        }
-        #commandBar.active { bottom: 0; }
 
         #cmdInput {
-            width: 100%; padding: 10px; border: 1px solid var(--border);
-            font-family: inherit; font-size: 1rem; outline: none;
+            width: 100%;
+            padding: 15px;
+            border: 1px solid rgba(0,0,0,0.2);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            outline: none;
+            transition: border-color 0.4s var(--bezier);
         }
 
-        /* Suggestions Box */
-        #cmdSuggestions {
-            position: absolute; bottom: 90px; left: 5%; width: 300px;
-            background: white; border: 1px solid var(--text);
-            display: none; flex-direction: column;
+        #cmdInput:focus {
+            border-color: var(--accent);
         }
-        .suggestion { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border); }
-        .suggestion:hover { background: var(--gray); font-weight: bold; }
 
-        /* Canvas for Physics */
-        #physics-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 50;
+        #cmdBox {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s var(--bezier);
         }
-        .physics-element { position: absolute; pointer-events: auto; }
+
+        #cmdBox.active {
+            max-height: 200px;
+            margin-top: 15px;
+        }
+
+        .cmd-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cmd-list li {
+            padding: 10px;
+            background: rgba(0,0,0,0.03);
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: monospace;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .cmd-list li:hover {
+            background: rgba(0,112,243, 0.1);
+            color: var(--accent);
+        }
+
+        /* --- NEW: LOW GRAPHICS OVERRIDE --- */
+        body.low-graphic * {
+            border-radius: 0 !important;
+            font-family: "Courier New", Courier, monospace !important;
+            box-shadow: none !important;
+            border: 2px solid #000 !important;
+            background: #fff !important;
+            color: #000 !important;
+        }
+        
+        body.low-graphic {
+            image-rendering: pixelated;
+        }
+
     </style>
 </head>
 <body>
 
-    <nav>
+    <nav id="nav">
         <div class="logo" onclick="location.reload()">Generic Website</div>
-        <div class="cmd-trigger" onclick="toggleCmdBar()">Generic Command Bar</div>
+        <div class="cmd-trigger" onclick="toggleCmdBar()">Generic command Bar</div>
     </nav>
 
-    <div id="main-content">
-        <header class="physics-element">
-            <span class="tag">Standard Header Component</span>
-            <h1>This is a very <br>large heading.</h1>
-        </header>
+    <header id="header">
+        <span class="category-tag">Standard Header Component</span>
+        <h1>A very tight, <br>modern editorial look.</h1>
+        <p style="color: var(--gray); max-width: 600px; margin: 0 auto;">
+            This layout fulfills all criteria from the structural checklist. But something entirely different is hiding just beneath the surface.
+        </p>
+    </header>
 
-        <div class="section">
-            <div class="content-box physics-element"><h3>Standard Box A</h3><p>Generic feature content.</p></div>
-            <div class="content-box physics-element"><h3>Standard Box B</h3><p>Generic feature content.</p></div>
+    <main class="grid-container" id="main">
+        <div class="box">
+            <h3>Interactive Block 1</h3>
+            <p style="margin-top: 10px; color: var(--gray);">Click the button below to test the state reset logic.</p>
+            <button id="actionBtn" onclick="performAction()">Click for Action</button>
+        </div>
+        <div class="box">
+            <h3>Physics Target 2</h3>
+            <p style="margin-top: 10px; color: var(--gray);">When gravity kicks in, these highly-styled grid blocks will become physical objects you can drag and throw.</p>
+        </div>
+    </main>
+
+    <footer id="footer">
+        <div>&copy; 2026 Generic Co.</div>
+        <div>Privacy / Terms</div>
+    </footer>
+
+    <div id="bottomBar">
+        <input type="text" id="cmdInput" placeholder="type here... (e.g., /physics, /ZeroG, meteor, /LowGraphic)">
+        <div id="cmdBox">
+            <ul class="cmd-list">
+                <li onclick="runCommand('/physics')">/physics (Gravity & Drag)</li>
+                <li onclick="runCommand('/ZeroG')">/ZeroG (Float Away)</li>
+                <li onclick="runCommand('/LowGraphic')">/LowGraphic (Blocky Pixelation)</li>
+                <li onclick="runCommand('meteor')">meteor (Spawn Impact)</li>
+            </ul>
         </div>
     </div>
-
-    <div id="commandBar">
-        <div id="cmdSuggestions">
-            <div class="suggestion" onclick="runCmd('/physics')">/physics (Enable Gravity)</div>
-            <div class="suggestion" onclick="runCmd('/ZeroG')">/ZeroG (Toggle Float)</div>
-            <div class="suggestion" onclick="runCmd('/LowGraphic')">/LowGraphic (Pixelate)</div>
-            <div class="suggestion" onclick="runCmd('/Meteor')">/Meteor (Chaos)</div>
-        </div>
-        <input type="text" id="cmdInput" placeholder="type here..." onfocus="showSuggest()" onblur="hideSuggest()">
-    </div>
-
-    <div id="physics-container"></div>
 
     <script>
-        // --- 1. COMMAND BAR LOGIC ---
-        function toggleCmdBar() {
-            const bar = document.getElementById('commandBar');
-            bar.classList.toggle('active');
+        /* -----------------------------------------------------
+           PART 1: THE CHECKLIST INTERACTIVE LOGIC (BUTTON)
+           ----------------------------------------------------- */
+        function performAction() {
+            const btn = document.getElementById('actionBtn');
+            btn.innerText = "Action Performed";
+            btn.style.backgroundColor = "var(--accent)";
+            
+            // State Reset after 2 seconds
+            setTimeout(() => {
+                btn.innerText = "Click for Action";
+                btn.style.backgroundColor = "var(--text)";
+            }, 2000);
         }
 
-        function showSuggest() { document.getElementById('cmdSuggestions').style.display = 'flex'; }
-        function hideSuggest() { setTimeout(() => { document.getElementById('cmdSuggestions').style.display = 'none'; }, 200); }
+        /* -----------------------------------------------------
+           PART 2: COMMAND BAR UI LOGIC
+           ----------------------------------------------------- */
+        const bottomBar = document.getElementById('bottomBar');
+        const cmdInput = document.getElementById('cmdInput');
+        const cmdBox = document.getElementById('cmdBox');
 
-        // --- 2. PHYSICS ENGINE SETUP ---
-        const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint, Composite } = Matter;
-        let engine, render, runner;
-        let isPhysicsEnabled = false;
-        let isZeroG = false;
-
-        function initPhysics() {
-            if (engine) return;
-            engine = Engine.create();
-            const container = document.getElementById('physics-container');
+        function toggleCmdBar() {
+            bottomBar.classList.toggle('visible');
             
-            // Create Ground
-            const ground = Bodies.rectangle(window.innerWidth/2, window.innerHeight + 50, window.innerWidth, 100, { isStatic: true });
-            World.add(engine.world, [ground]);
+            // Push everything up if physics is active!
+            if (physicsActive) {
+                pushBodiesUp();
+            }
+        }
 
-            // Convert HTML elements to Physics objects
-            const elements = document.querySelectorAll('.physics-element');
+        // Show commands when interacting with the input box
+        cmdInput.addEventListener('focus', () => cmdBox.classList.add('active'));
+        
+        // Listen for Enter key on the text box
+        cmdInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                runCommand(this.value.trim());
+                this.value = ''; // Clear input
+                cmdBox.classList.remove('active');
+            }
+        });
+
+        function runCommand(cmd) {
+            const command = cmd.toLowerCase();
+            if (command.includes('/physics')) startPhysics();
+            if (command.includes('/zerog')) toggleZeroG();
+            if (command.includes('meteor')) spawnMeteor();
+            if (command.includes('/lowgraphic')) document.body.classList.toggle('low-graphic');
+            
+            // Automatically hide cmd box after running
+            cmdBox.classList.remove('active');
+            cmdInput.value = '';
+        }
+
+
+        /* -----------------------------------------------------
+           PART 3: MATTER.JS PHYSICS INTEGRATION
+           ----------------------------------------------------- */
+        let engine;
+        let physicsActive = false;
+        let domBodies = [];
+
+        function startPhysics() {
+            if (physicsActive) return;
+            physicsActive = true;
+
+            // Prevent scrolling so the physics world matches the screen perfectly
+            document.body.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+
+            // Matter.js Aliases
+            const Engine = Matter.Engine,
+                  Runner = Matter.Runner,
+                  Bodies = Matter.Bodies,
+                  Composite = Matter.Composite,
+                  Mouse = Matter.Mouse,
+                  MouseConstraint = Matter.MouseConstraint;
+
+            engine = Engine.create();
+
+            // Create invisible boundaries (Floor and Walls)
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            const floor = Bodies.rectangle(w/2, h + 50, w + 200, 100, { isStatic: true });
+            const leftWall = Bodies.rectangle(-50, h/2, 100, h * 2, { isStatic: true });
+            const rightWall = Bodies.rectangle(w + 50, h/2, 100, h * 2, { isStatic: true });
+            Composite.add(engine.world, [floor, leftWall, rightWall]);
+
+            // Grab elements to turn into physics bodies
+            // Note: we grab nav as well so the "Generic command Bar" falls!
+            const elements = document.querySelectorAll('nav, header, .box, footer');
+            
             elements.forEach(el => {
                 const rect = el.getBoundingClientRect();
-                const body = Bodies.rectangle(rect.left + rect.width/2, rect.top + rect.height/2, rect.width, rect.height, {
-                    restitution: 0.5, friction: 0.5
-                });
-                body.element = el;
-                World.add(engine.world, body);
                 
-                // Set absolute positioning for physics
-                el.style.position = 'fixed';
+                // Set fixed size and convert to absolute positioning
                 el.style.width = rect.width + 'px';
+                el.style.height = rect.height + 'px';
+                el.style.position = 'absolute';
+                el.style.top = '0px';
+                el.style.left = '0px';
                 el.style.margin = '0';
+                
+                // Create the Matter body
+                // Matter.js positions from the center of the body
+                const body = Bodies.rectangle(
+                    rect.left + rect.width / 2, 
+                    rect.top + rect.height / 2, 
+                    rect.width, 
+                    rect.height,
+                    { restitution: 0.4, friction: 0.1 } // Makes them slightly bouncy
+                );
+                
+                Composite.add(engine.world, body);
+                domBodies.push({ el: el, body: body });
             });
 
-            // Add Mouse Control (Drag and Throw)
-            const mouse = Mouse.create(container);
+            // Add Mouse Dragging functionality
+            const mouse = Mouse.create(document.body);
             const mouseConstraint = MouseConstraint.create(engine, {
                 mouse: mouse,
                 constraint: { stiffness: 0.2, render: { visible: false } }
             });
-            World.add(engine.world, mouseConstraint);
+            Composite.add(engine.world, mouseConstraint);
 
-            // Update Loop
-            (function update() {
-                elements.forEach((el, i) => {
-                    const body = engine.world.bodies.find(b => b.element === el);
-                    if (body) {
-                        el.style.transform = `translate(${body.position.x - body.positionPrev.x}px, ${body.position.y - body.positionPrev.y}px) rotate(${body.angle}rad)`;
-                        el.style.left = (body.position.x - el.offsetWidth/2) + 'px';
-                        el.style.top = (body.position.y - el.offsetHeight/2) + 'px';
-                    }
-                });
-                Engine.update(engine);
-                requestAnimationFrame(update);
-            })();
+            // Run the engine
+            Runner.run(Runner.create(), engine);
+
+            // Start the DOM sync loop
+            requestAnimationFrame(updateDOM);
         }
 
-        // --- 3. COMMANDS ---
-        function runCmd(cmd) {
-            if (cmd === '/physics') {
-                initPhysics();
+        // Syncs the HTML elements visual positions with the invisible Matter.js bodies
+        function updateDOM() {
+            domBodies.forEach(item => {
+                const pos = item.body.position;
+                const angle = item.body.angle;
+                const hw = item.el.offsetWidth / 2;
+                const hh = item.el.offsetHeight / 2;
+                // Apply hardware-accelerated transform to the HTML element
+                item.el.style.transform = `translate(${pos.x - hw}px, ${pos.y - hh}px) rotate(${angle}rad)`;
+            });
+            if (physicsActive) requestAnimationFrame(updateDOM);
+        }
+
+        /* --- Physics Special Effects --- */
+
+        // Shoots everything upward when the bottom bar triggers
+        function pushBodiesUp() {
+            domBodies.forEach(b => {
+                Matter.Body.setVelocity(b.body, { 
+                    x: (Math.random() - 0.5) * 15, 
+                    y: -25 // Strong upward force
+                });
+            });
+        }
+
+        function toggleZeroG() {
+            if (!physicsActive) startPhysics();
+            
+            // Toggle gravity Y axis between 0 and 1
+            if (engine.world.gravity.y === 0) {
                 engine.world.gravity.y = 1;
+            } else {
+                engine.world.gravity.y = 0;
+                // Apply a gentle random nudge to make things float instantly
+                domBodies.forEach(b => {
+                    Matter.Body.applyForce(b.body, b.body.position, {
+                        x: (Math.random() - 0.5) * 0.05, 
+                        y: (Math.random() - 0.5) * 0.05
+                    });
+                });
             }
-            if (cmd === '/ZeroG') {
-                initPhysics();
-                isZeroG = !isZeroG;
-                engine.world.gravity.y = isZeroG ? 0 : 1;
-            }
-            if (cmd === '/LowGraphic') {
-                document.body.classList.toggle('low-graphics');
-            }
-            if (cmd === '/Meteor') {
-                initPhysics();
-                const meteor = Bodies.circle(Math.random() * window.innerWidth, -100, 50, { density: 0.1 });
-                World.add(engine.world, meteor);
-                Matter.Body.setVelocity(meteor, {x: (Math.random() - 0.5) * 20, y: 15});
-            }
+        }
+
+        function spawnMeteor() {
+            if (!physicsActive) startPhysics();
+            
+            // Create DOM Element
+            const meteorEl = document.createElement('div');
+            meteorEl.innerText = "☄️";
+            meteorEl.style.position = 'absolute';
+            meteorEl.style.fontSize = '80px'; // Massive meteor
+            meteorEl.style.top = '0px';
+            meteorEl.style.left = '0px';
+            document.body.appendChild(meteorEl);
+
+            // Create Matter Body (Heavy, dense circle off-screen at the top)
+            const meteorBody = Matter.Bodies.circle(window.innerWidth / 2 + (Math.random() * 200 - 100), -150, 40, {
+                density: 2.0, // Very heavy to crash through objects
+                restitution: 0.5
+            });
+            
+            Matter.Composite.add(engine.world, meteorBody);
+            domBodies.push({ el: meteorEl, body: meteorBody });
+
+            // Fire it downward with huge velocity
+            Matter.Body.setVelocity(meteorBody, { 
+                x: (Math.random() - 0.5) * 10, 
+                y: 35 
+            });
         }
     </script>
 </body>
