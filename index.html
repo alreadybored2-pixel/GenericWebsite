@@ -8,483 +8,356 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
 
     <style>
-        /* 2. The Style System (CSS) */
+        /* --- 1. BASE GENERIC STYLES --- */
         :root {
             --bg: #ffffff;
-            --text: #111111;
-            --accent: #0070f3; /* Vercel-style Blue */
-            --gray: #666666;
-            --bezier: cubic-bezier(0.16, 1, 0.3, 1);
+            --text: #333333;
+            --accent: #0070f3;
         }
 
-        /* Global Reset */
-        * {
+        body, html {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* Typography */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            line-height: 1.6;
-            overflow-x: hidden;
-            transition: all 0.4s var(--bezier);
+            overflow: hidden; /* Keep the game contained */
         }
 
-        /* 3. Navigation Bar Components */
-        nav {
-            position: sticky;
-            top: 0;
-            width: 100%;
-            height: 60px;
+        .generic-nav {
+            padding: 20px 5%;
+            border-bottom: 1px solid #ddd;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 0 5%;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px); /* Glassmorphism */
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            z-index: 100;
+            font-weight: bold;
         }
 
-        .logo {
-            font-weight: 800;
-            font-size: 1.2rem;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        /* The New Command Bar Trigger */
-        .cmd-trigger {
-            font-weight: 500;
-            color: var(--gray);
-            cursor: pointer;
-            transition: color 0.4s var(--bezier);
-            user-select: none;
-        }
-
-        .cmd-trigger:hover {
-            color: var(--accent);
-        }
-
-        /* 4. Layout & Content Elements */
-        header {
-            padding: 15vh 5%;
+        .generic-hero {
             text-align: center;
+            padding: 100px 20px;
         }
 
-        .category-tag {
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            color: var(--gray);
-            font-weight: 600;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        h1 {
-            font-size: clamp(2.5rem, 5vw, 4.5rem);
-            letter-spacing: -3px;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 20px;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-            padding: 0 5% 10vh;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* Media Queries for Mobile */
-        @media (max-width: 768px) {
-            .grid-container {
-                grid-template-columns: 1fr; /* Stacks to 1 column */
-            }
-        }
-
-        .box {
-            border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 12px;
-            padding: 2rem;
-            background: #fafafa;
-            transition: transform 0.4s var(--bezier), box-shadow 0.4s var(--bezier);
+        .generic-box-container {
             display: flex;
-            flex-direction: column;
             justify-content: center;
-            align-items: flex-start;
-        }
-
-        .box:hover {
-            transform: translateY(-8px); /* Lifts on hover */
-            box-shadow: 0 12px 24px rgba(0,0,0,0.05);
-        }
-
-        button {
-            background-color: var(--text);
-            color: var(--bg);
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background-color 0.4s var(--bezier), transform 0.4s var(--bezier);
-        }
-
-        button:hover {
-            background-color: var(--accent);
-        }
-
-        footer {
-            display: flex;
-            justify-content: space-between;
-            padding: 2rem 5%;
-            border-top: 1px solid rgba(0,0,0,0.05);
-            font-size: 0.9rem;
-            color: var(--gray);
-        }
-
-        /* --- NEW: BOTTOM COMMAND BAR STYLES --- */
-        #bottomBar {
-            position: fixed;
-            bottom: -250px; /* Hidden by default */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 600px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(0,0,0,0.1);
-            border-radius: 16px 16px 0 0;
+            gap: 20px;
             padding: 20px;
-            transition: bottom 0.6s var(--bezier); /* Smooth ease-out slide in */
-            z-index: 9999;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
         }
 
-        #bottomBar.visible {
-            bottom: 0;
-        }
-
-        #cmdInput {
-            width: 100%;
-            padding: 15px;
-            border: 1px solid rgba(0,0,0,0.2);
-            border-radius: 8px;
-            font-size: 1.1rem;
-            outline: none;
-            transition: border-color 0.4s var(--bezier);
-        }
-
-        #cmdInput:focus {
-            border-color: var(--accent);
-        }
-
-        #cmdBox {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.6s var(--bezier);
-        }
-
-        #cmdBox.active {
-            max-height: 200px;
-            margin-top: 15px;
-        }
-
-        .cmd-list {
-            list-style: none;
+        .generic-box {
+            width: 200px;
+            height: 150px;
+            border: 1px solid #ccc;
+            background: #fafafa;
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            align-items: center;
+            justify-content: center;
         }
 
-        .cmd-list li {
-            padding: 10px;
-            background: rgba(0,0,0,0.03);
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: monospace;
-            font-weight: 600;
-            transition: background 0.3s ease;
+        /* --- 2. GLITCH & SHAKE EFFECTS --- */
+        .glitch-active {
+            animation: extremeShake 0.1s infinite, invertColors 0.5s infinite;
         }
 
-        .cmd-list li:hover {
-            background: rgba(0,112,243, 0.1);
-            color: var(--accent);
+        @keyframes extremeShake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(0px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(2px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(2px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
 
-        /* --- NEW: LOW GRAPHICS OVERRIDE --- */
-        body.low-graphic * {
-            border-radius: 0 !important;
-            font-family: "Courier New", Courier, monospace !important;
-            box-shadow: none !important;
-            border: 2px solid #000 !important;
-            background: #fff !important;
-            color: #000 !important;
-        }
-        
-        body.low-graphic {
-            image-rendering: pixelated;
+        @keyframes invertColors {
+            0% { filter: invert(0) hue-rotate(0deg); }
+            50% { filter: invert(1) hue-rotate(180deg); }
+            100% { filter: invert(0) hue-rotate(360deg); }
         }
 
+        /* Continuous shake for the level */
+        .level-shake {
+            animation: subtleShake 0.5s infinite;
+        }
+
+        @keyframes subtleShake {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-1px, -1px); }
+            100% { transform: translate(1px, 1px); }
+        }
+
+        /* --- 3. OVERLAYS --- */
+        #glassOverlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            background: radial-gradient(circle, transparent 20%, rgba(255,255,255,0.8) 25%, transparent 30%),
+                        linear-gradient(45deg, transparent 48%, white 50%, transparent 52%),
+                        linear-gradient(-45deg, transparent 48%, white 50%, transparent 52%);
+            background-size: 100% 100%;
+        }
+
+        .glass-break {
+            animation: shatter 0.5s forwards;
+        }
+
+        @keyframes shatter {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.5); }
+        }
+
+        #matrixCanvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        /* --- 4. GAME ELEMENTS --- */
+        .game-entity {
+            position: absolute;
+            will-change: transform;
+        }
+
+        #redBall {
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle at 15px 15px, #ff4d4d, #cc0000);
+            border-radius: 50%;
+            border: 2px solid #800000;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.3), 0 5px 10px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 500;
+        }
+
+        .platform-text {
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            color: #fff;
+            background: #111;
+            padding: 10px 20px;
+            border: 2px solid #0f0;
+            box-shadow: 0 0 10px #0f0;
+            display: none;
+            text-align: center;
+            z-index: 400;
+        }
     </style>
 </head>
 <body>
 
-    <nav id="nav">
-        <div class="logo" onclick="location.reload()">Generic Website</div>
-        <div class="cmd-trigger" onclick="toggleCmdBar()">Generic command Bar</div>
-    </nav>
+    <canvas id="matrixCanvas"></canvas>
 
-    <header id="header">
-        <span class="category-tag">Standard Header Component</span>
-        <h1>A very tight, <br>modern editorial look.</h1>
-        <p style="color: var(--gray); max-width: 600px; margin: 0 auto;">
-            This layout fulfills all criteria from the structural checklist. But something entirely different is hiding just beneath the surface.
-        </p>
-    </header>
+    <div id="wrapper">
+        <nav class="generic-nav dom-target">
+            <span>Generic Website</span>
+            <span>Home | About | Contact</span>
+        </nav>
+        
+        <header class="generic-hero dom-target">
+            <h1>Welcome to the Generic Website</h1>
+            <p>This is a perfectly normal place. Nothing bad will happen here.</p>
+        </header>
 
-    <main class="grid-container" id="main">
-        <div class="box">
-            <h3>Interactive Block 1</h3>
-            <p style="margin-top: 10px; color: var(--gray);">Click the button below to test the state reset logic.</p>
-            <button id="actionBtn" onclick="performAction()">Click for Action</button>
-        </div>
-        <div class="box">
-            <h3>Physics Target 2</h3>
-            <p style="margin-top: 10px; color: var(--gray);">When gravity kicks in, these highly-styled grid blocks will become physical objects you can drag and throw.</p>
-        </div>
-    </main>
-
-    <footer id="footer">
-        <div>&copy; 2026 Generic Co.</div>
-        <div>Privacy / Terms</div>
-    </footer>
-
-    <div id="bottomBar">
-        <input type="text" id="cmdInput" placeholder="type here... (e.g., /physics, /ZeroG, meteor, /LowGraphic)">
-        <div id="cmdBox">
-            <ul class="cmd-list">
-                <li onclick="runCommand('/physics')">/physics (Gravity & Drag)</li>
-                <li onclick="runCommand('/ZeroG')">/ZeroG (Float Away)</li>
-                <li onclick="runCommand('/LowGraphic')">/LowGraphic (Blocky Pixelation)</li>
-                <li onclick="runCommand('meteor')">meteor (Spawn Impact)</li>
-            </ul>
+        <div class="generic-box-container">
+            <div class="generic-box dom-target">Info Box 1</div>
+            <div class="generic-box dom-target">Info Box 2</div>
+            <div class="generic-box dom-target">Info Box 3</div>
         </div>
     </div>
 
+    <div id="glassOverlay"></div>
+
+    <div id="redBall" class="game-entity"></div>
+    <div id="plat1" class="game-entity platform-text">CHAPTER ONE</div>
+    <div id="plat2" class="game-entity platform-text">USE WASD</div>
+    <div id="plat3" class="game-entity platform-text">TO SURVIVE</div>
+
     <script>
-        /* -----------------------------------------------------
-           PART 1: THE CHECKLIST INTERACTIVE LOGIC (BUTTON)
-           ----------------------------------------------------- */
-        function performAction() {
-            const btn = document.getElementById('actionBtn');
-            btn.innerText = "Action Performed";
-            btn.style.backgroundColor = "var(--accent)";
+        // --- TIMELINE SEQUENCE ---
+        setTimeout(triggerGlitch, 5000); // 5 seconds in
+
+        function triggerGlitch() {
+            // 1. Start Shaking & Inverting
+            document.body.classList.add('glitch-active');
             
-            // State Reset after 2 seconds
+            // 2. Glass Break (0.5s later)
             setTimeout(() => {
-                btn.innerText = "Click for Action";
-                btn.style.backgroundColor = "var(--text)";
+                document.getElementById('glassOverlay').classList.add('glass-break');
+            }, 500);
+
+            // 3. Matrix Rain (1s later)
+            setTimeout(() => {
+                document.getElementById('matrixCanvas').style.opacity = '1';
+                startMatrixRain();
+            }, 1000);
+
+            // 4. Parallax Drop & Game Start (2s later)
+            setTimeout(() => {
+                document.body.classList.remove('glitch-active');
+                document.body.classList.add('level-shake'); // Switch to subtle level shake
+                startGamePhase();
             }, 2000);
         }
 
-        /* -----------------------------------------------------
-           PART 2: COMMAND BAR UI LOGIC
-           ----------------------------------------------------- */
-        const bottomBar = document.getElementById('bottomBar');
-        const cmdInput = document.getElementById('cmdInput');
-        const cmdBox = document.getElementById('cmdBox');
+        // --- MATRIX RAIN EFFECT ---
+        function startMatrixRain() {
+            const canvas = document.getElementById('matrixCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
 
-        function toggleCmdBar() {
-            bottomBar.classList.toggle('visible');
-            
-            // Push everything up if physics is active!
-            if (physicsActive) {
-                pushBodiesUp();
-            }
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*';
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const drops = Array(Math.floor(columns)).fill(1);
+
+            setInterval(() => {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#0F0';
+                ctx.font = fontSize + 'px monospace';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+            }, 33);
         }
 
-        // Show commands when interacting with the input box
-        cmdInput.addEventListener('focus', () => cmdBox.classList.add('active'));
-        
-        // Listen for Enter key on the text box
-        cmdInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                runCommand(this.value.trim());
-                this.value = ''; // Clear input
-                cmdBox.classList.remove('active');
-            }
-        });
-
-        function runCommand(cmd) {
-            const command = cmd.toLowerCase();
-            if (command.includes('/physics')) startPhysics();
-            if (command.includes('/zerog')) toggleZeroG();
-            if (command.includes('meteor')) spawnMeteor();
-            if (command.includes('/lowgraphic')) document.body.classList.toggle('low-graphic');
-            
-            // Automatically hide cmd box after running
-            cmdBox.classList.remove('active');
-            cmdInput.value = '';
-        }
-
-
-        /* -----------------------------------------------------
-           PART 3: MATTER.JS PHYSICS INTEGRATION
-           ----------------------------------------------------- */
-        let engine;
-        let physicsActive = false;
-        let domBodies = [];
-
-        function startPhysics() {
-            if (physicsActive) return;
-            physicsActive = true;
-
-            // Prevent scrolling so the physics world matches the screen perfectly
-            document.body.style.overflow = 'hidden';
-            window.scrollTo(0, 0);
-
-            // Matter.js Aliases
+        // --- PHASE 2: PHYSICS GAME ---
+        function startGamePhase() {
             const Engine = Matter.Engine,
                   Runner = Matter.Runner,
                   Bodies = Matter.Bodies,
-                  Composite = Matter.Composite,
-                  Mouse = Matter.Mouse,
-                  MouseConstraint = Matter.MouseConstraint;
+                  Body = Matter.Body,
+                  Composite = Matter.Composite;
 
-            engine = Engine.create();
-
-            // Create invisible boundaries (Floor and Walls)
+            const engine = Engine.create();
+            // Lower gravity initially for parallax floaty effect
+            engine.world.gravity.y = 0.2; 
+            
             const w = window.innerWidth;
             const h = window.innerHeight;
-            const floor = Bodies.rectangle(w/2, h + 50, w + 200, 100, { isStatic: true });
-            const leftWall = Bodies.rectangle(-50, h/2, 100, h * 2, { isStatic: true });
-            const rightWall = Bodies.rectangle(w + 50, h/2, 100, h * 2, { isStatic: true });
-            Composite.add(engine.world, [floor, leftWall, rightWall]);
+            let bodiesMap = []; // Maps DOM elements to Matter bodies
 
-            // Grab elements to turn into physics bodies
-            // Note: we grab nav as well so the "Generic command Bar" falls!
-            const elements = document.querySelectorAll('nav, header, .box, footer');
-            
-            elements.forEach(el => {
+            // 1. Drop the Generic UI (Parallax fall)
+            const targets = document.querySelectorAll('.dom-target');
+            targets.forEach(el => {
                 const rect = el.getBoundingClientRect();
-                
-                // Set fixed size and convert to absolute positioning
+                el.style.position = 'absolute';
                 el.style.width = rect.width + 'px';
                 el.style.height = rect.height + 'px';
-                el.style.position = 'absolute';
-                el.style.top = '0px';
-                el.style.left = '0px';
                 el.style.margin = '0';
                 
-                // Create the Matter body
-                // Matter.js positions from the center of the body
                 const body = Bodies.rectangle(
                     rect.left + rect.width / 2, 
                     rect.top + rect.height / 2, 
                     rect.width, 
                     rect.height,
-                    { restitution: 0.4, friction: 0.1 } // Makes them slightly bouncy
+                    { 
+                        restitution: 0.2, 
+                        frictionAir: Math.random() * 0.05 + 0.01 // Parallax different fall speeds
+                    } 
                 );
                 
+                // Nudge them so they tumble
+                Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.1);
                 Composite.add(engine.world, body);
-                domBodies.push({ el: el, body: body });
+                bodiesMap.push({ el, body });
             });
 
-            // Add Mouse Dragging functionality
-            const mouse = Mouse.create(document.body);
-            const mouseConstraint = MouseConstraint.create(engine, {
-                mouse: mouse,
-                constraint: { stiffness: 0.2, render: { visible: false } }
-            });
-            Composite.add(engine.world, mouseConstraint);
+            // 2. Spawn "CHAPTER ONE" Platforms after 2 seconds
+            setTimeout(() => {
+                engine.world.gravity.y = 1; // Return gravity to normal
+                
+                const platforms = [
+                    { id: 'plat1', x: w/2 - 200, y: h - 100, width: 350, height: 60 },
+                    { id: 'plat2', x: w/2 + 250, y: h - 250, width: 250, height: 60 },
+                    { id: 'plat3', x: w/2 - 350, y: h - 400, width: 300, height: 60 }
+                ];
 
-            // Run the engine
-            Runner.run(Runner.create(), engine);
-
-            // Start the DOM sync loop
-            requestAnimationFrame(updateDOM);
-        }
-
-        // Syncs the HTML elements visual positions with the invisible Matter.js bodies
-        function updateDOM() {
-            domBodies.forEach(item => {
-                const pos = item.body.position;
-                const angle = item.body.angle;
-                const hw = item.el.offsetWidth / 2;
-                const hh = item.el.offsetHeight / 2;
-                // Apply hardware-accelerated transform to the HTML element
-                item.el.style.transform = `translate(${pos.x - hw}px, ${pos.y - hh}px) rotate(${angle}rad)`;
-            });
-            if (physicsActive) requestAnimationFrame(updateDOM);
-        }
-
-        /* --- Physics Special Effects --- */
-
-        // Shoots everything upward when the bottom bar triggers
-        function pushBodiesUp() {
-            domBodies.forEach(b => {
-                Matter.Body.setVelocity(b.body, { 
-                    x: (Math.random() - 0.5) * 15, 
-                    y: -25 // Strong upward force
+                platforms.forEach(p => {
+                    const el = document.getElementById(p.id);
+                    el.style.display = 'block';
+                    el.style.width = p.width + 'px';
+                    el.style.height = p.height + 'px';
+                    
+                    const body = Bodies.rectangle(p.x, p.y, p.width, p.height, { isStatic: true });
+                    Composite.add(engine.world, body);
+                    bodiesMap.push({ el, body });
                 });
-            });
-        }
 
-        function toggleZeroG() {
-            if (!physicsActive) startPhysics();
-            
-            // Toggle gravity Y axis between 0 and 1
-            if (engine.world.gravity.y === 0) {
-                engine.world.gravity.y = 1;
-            } else {
-                engine.world.gravity.y = 0;
-                // Apply a gentle random nudge to make things float instantly
-                domBodies.forEach(b => {
-                    Matter.Body.applyForce(b.body, b.body.position, {
-                        x: (Math.random() - 0.5) * 0.05, 
-                        y: (Math.random() - 0.5) * 0.05
-                    });
+                // Spawn Red Ball
+                spawnRedBall();
+            }, 2000);
+
+            // 3. The Red Ball & WASD Controls
+            let ballBody;
+            function spawnRedBall() {
+                const ballEl = document.getElementById('redBall');
+                ballEl.style.display = 'block';
+                
+                // Red Ball 4 physics: Bouncy, good friction
+                ballBody = Bodies.circle(w/2 - 200, -50, 20, {
+                    restitution: 0.6,
+                    friction: 0.05,
+                    density: 0.04
+                });
+                
+                Composite.add(engine.world, ballBody);
+                bodiesMap.push({ el: ballEl, body: ballBody });
+                setupControls();
+            }
+
+            function setupControls() {
+                const keys = {};
+                window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+                window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+                // Game Loop for Controls
+                Matter.Events.on(engine, 'beforeUpdate', () => {
+                    if (!ballBody) return;
+                    const speed = 0.02;
+                    
+                    if (keys['a']) Body.applyForce(ballBody, ballBody.position, { x: -speed, y: 0 });
+                    if (keys['d']) Body.applyForce(ballBody, ballBody.position, { x: speed, y: 0 });
+                    
+                    // Jump (W) - Only if roughly moving slowly on Y axis (pseudo-ground check)
+                    if (keys['w'] && Math.abs(ballBody.velocity.y) < 0.5) {
+                        Body.applyForce(ballBody, ballBody.position, { x: 0, y: -0.25 });
+                        keys['w'] = false; // Prevent holding jump
+                    }
                 });
             }
-        }
 
-        function spawnMeteor() {
-            if (!physicsActive) startPhysics();
-            
-            // Create DOM Element
-            const meteorEl = document.createElement('div');
-            meteorEl.innerText = "☄️";
-            meteorEl.style.position = 'absolute';
-            meteorEl.style.fontSize = '80px'; // Massive meteor
-            meteorEl.style.top = '0px';
-            meteorEl.style.left = '0px';
-            document.body.appendChild(meteorEl);
+            // Sync DOM with Physics
+            function updateDOM() {
+                bodiesMap.forEach(item => {
+                    const pos = item.body.position;
+                    const angle = item.body.angle;
+                    const hw = item.el.offsetWidth / 2;
+                    const hh = item.el.offsetHeight / 2;
+                    item.el.style.transform = `translate(${pos.x - hw}px, ${pos.y - hh}px) rotate(${angle}rad)`;
+                });
+                requestAnimationFrame(updateDOM);
+            }
 
-            // Create Matter Body (Heavy, dense circle off-screen at the top)
-            const meteorBody = Matter.Bodies.circle(window.innerWidth / 2 + (Math.random() * 200 - 100), -150, 40, {
-                density: 2.0, // Very heavy to crash through objects
-                restitution: 0.5
-            });
-            
-            Matter.Composite.add(engine.world, meteorBody);
-            domBodies.push({ el: meteorEl, body: meteorBody });
-
-            // Fire it downward with huge velocity
-            Matter.Body.setVelocity(meteorBody, { 
-                x: (Math.random() - 0.5) * 10, 
-                y: 35 
-            });
+            // Start Engine
+            Runner.run(Runner.create(), engine);
+            requestAnimationFrame(updateDOM);
         }
     </script>
 </body>
