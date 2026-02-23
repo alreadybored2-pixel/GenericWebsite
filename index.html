@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generic Website - Interactive</title>
+    <title>Generic Website</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <style>
         :root {
@@ -12,225 +12,204 @@
             --secondary: #666666;
             --border: #eeeeee;
             --accent: #0070f3;
-            --transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* LOW GRAPHICS MODE */
-        body.low-graphics * {
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            font-family: 'Courier New', Courier, monospace !important;
-            letter-spacing: 0px !important;
-            filter: contrast(150%) brightness(110%);
-        }
-        body.low-graphics .content-box { border: 4px solid black; }
-
+        /* 1. Reset & Metadata Style */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            overflow: hidden; /* Prevent scroll during physics */
+            overflow-x: hidden;
             height: 100vh;
         }
 
-        /* --- NAVIGATION --- */
+        /* Low Graphics Mode Class */
+        .low-graphics * {
+            border-radius: 0 !important;
+            image-rendering: pixelated;
+            font-family: monospace !important;
+            box-shadow: none !important;
+        }
+
+        /* 2. Navigation Bar (Glassmorphism) */
         nav {
-            position: fixed; top: 0; width: 100%; z-index: 100;
+            position: fixed;
+            top: 0; width: 100%; z-index: 1000;
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
-            display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 5%;
         }
         .logo { font-size: 1.1rem; font-weight: 700; text-transform: uppercase; cursor: pointer; }
-        #cmd-trigger { cursor: pointer; font-weight: 500; color: var(--accent); transition: var(--transition); }
-
-        /* --- MAIN CONTENT (TO BE SHATTERED) --- */
-        #physics-container { width: 100%; height: 100vh; position: relative; }
-        .phy-obj { position: absolute; background: white; pointer-events: none; }
         
-        header { padding: 15vh 5%; }
+        /* Command Bar Trigger */
+        .cmd-trigger { 
+            color: var(--accent); font-weight: 600; cursor: pointer; transition: var(--transition); 
+        }
+        .cmd-trigger:hover { letter-spacing: 1px; }
+
+        /* 3. Layout Elements */
+        header { padding: 15vh 5% 5vh; }
+        .tag { font-size: 0.8rem; font-weight: 600; color: var(--secondary); text-transform: uppercase; }
         h1 { font-size: clamp(3rem, 10vw, 6rem); font-weight: 800; letter-spacing: -3px; line-height: 0.9; }
         
         .section { padding: 2rem 5%; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-        .content-box { padding: 2rem; border: 1px solid var(--border); border-radius: 8px; }
+        .content-box { 
+            padding: 2rem; border: 1px solid var(--border); border-radius: 4px; 
+            background: white; transition: var(--transition); 
+        }
+        .content-box:hover { transform: translateY(-5px); border-color: var(--text); }
 
-        /* --- COMMAND BAR --- */
-        #command-bar {
+        /* 4. Command Bar (Bottom Slide-in) */
+        #commandBar {
             position: fixed; bottom: -100px; left: 0; width: 100%;
-            height: 80px; background: white; border-top: 2px solid var(--text);
+            height: 80px; background: white; border-top: 1px solid var(--text);
             display: flex; align-items: center; padding: 0 5%;
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 200;
+            transition: bottom 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 2000;
         }
-        #command-bar.active { transform: translateY(-100px); }
+        #commandBar.active { bottom: 0; }
 
-        #command-input {
-            width: 100%; padding: 15px; border: 1px solid var(--border);
-            font-size: 1.1rem; outline: none;
+        #cmdInput {
+            width: 100%; padding: 10px; border: 1px solid var(--border);
+            font-family: inherit; font-size: 1rem; outline: none;
         }
 
-        /* COMMAND LIST POPUP */
-        #cmd-list {
-            position: absolute; bottom: 90px; left: 5%; background: black;
-            color: white; padding: 1rem; border-radius: 8px; display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        /* Suggestions Box */
+        #cmdSuggestions {
+            position: absolute; bottom: 90px; left: 5%; width: 300px;
+            background: white; border: 1px solid var(--text);
+            display: none; flex-direction: column;
         }
-        #cmd-list ul { list-style: none; }
-        #cmd-list li { padding: 5px 0; font-family: monospace; opacity: 0.8; }
-        #cmd-list.active { display: block; }
+        .suggestion { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border); }
+        .suggestion:hover { background: var(--gray); font-weight: bold; }
 
-        canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
+        /* Canvas for Physics */
+        #physics-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 50;
+        }
+        .physics-element { position: absolute; pointer-events: auto; }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="logo">Generic Website</div>
-        <div id="cmd-trigger">Generic Command Bar</div>
+        <div class="logo" onclick="location.reload()">Generic Website</div>
+        <div class="cmd-trigger" onclick="toggleCmdBar()">Generic Command Bar</div>
     </nav>
 
-    <div id="physics-container">
-        <header class="phy-node" data-type="text">
-            <h1>This is a very<br>large heading.</h1>
+    <div id="main-content">
+        <header class="physics-element">
+            <span class="tag">Standard Header Component</span>
+            <h1>This is a very <br>large heading.</h1>
         </header>
 
         <div class="section">
-            <div class="content-box phy-node" data-type="box">
-                <h3>Standard Box A</h3>
-                <p>Generic feature description goes here.</p>
-            </div>
-            <div class="content-box phy-node" data-type="box">
-                <h3>Standard Box B</h3>
-                <p>Identical feature for consistency.</p>
-            </div>
+            <div class="content-box physics-element"><h3>Standard Box A</h3><p>Generic feature content.</p></div>
+            <div class="content-box physics-element"><h3>Standard Box B</h3><p>Generic feature content.</p></div>
         </div>
     </div>
 
-    <div id="command-bar">
-        <div id="cmd-list">
-            <ul>
-                <li>/physics - Enable Gravity</li>
-                <li>/ZeroG - Float Mode</li>
-                <li>/LowGraphic - Pixel Mode</li>
-                <li>/meteor - Destructive Event</li>
-            </ul>
+    <div id="commandBar">
+        <div id="cmdSuggestions">
+            <div class="suggestion" onclick="runCmd('/physics')">/physics (Enable Gravity)</div>
+            <div class="suggestion" onclick="runCmd('/ZeroG')">/ZeroG (Toggle Float)</div>
+            <div class="suggestion" onclick="runCmd('/LowGraphic')">/LowGraphic (Pixelate)</div>
+            <div class="suggestion" onclick="runCmd('/Meteor')">/Meteor (Chaos)</div>
         </div>
-        <input type="text" id="command-input" placeholder="type here..." autocomplete="off">
+        <input type="text" id="cmdInput" placeholder="type here..." onfocus="showSuggest()" onblur="hideSuggest()">
     </div>
+
+    <div id="physics-container"></div>
 
     <script>
-        const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint, Events } = Matter;
-        
-        // Setup Engine
-        const engine = Engine.create();
-        const world = engine.world;
-        engine.gravity.y = 0; // Start with no gravity
-
-        // Trigger Command Bar
-        const trigger = document.getElementById('cmd-trigger');
-        const bar = document.getElementById('command-bar');
-        const input = document.getElementById('command-input');
-        const list = document.getElementById('cmd-list');
-
-        trigger.addEventListener('click', () => {
+        // --- 1. COMMAND BAR LOGIC ---
+        function toggleCmdBar() {
+            const bar = document.getElementById('commandBar');
             bar.classList.toggle('active');
-            input.focus();
-            // If text has fallen, clicking trigger "pushes" them
-            if(engine.gravity.y > 0) pushEverythingUp();
-        });
-
-        input.addEventListener('focus', () => list.classList.add('active'));
-        input.addEventListener('blur', () => setTimeout(() => list.classList.remove('active'), 200));
-
-        // Physics Initialization
-        let hasShattered = false;
-        function shatter() {
-            if(hasShattered) return;
-            hasShattered = true;
-
-            const nodes = document.querySelectorAll('.phy-node');
-            nodes.forEach(node => {
-                const rect = node.getBoundingClientRect();
-                const body = Bodies.rectangle(
-                    rect.left + rect.width/2,
-                    rect.top + rect.height/2,
-                    rect.width,
-                    rect.height,
-                    { frictionAir: 0.05, restitution: 0.6 }
-                );
-                
-                // Link DOM to Physics
-                Composite.add(world, body);
-                
-                // Render loop to move DOM elements
-                (function update() {
-                    node.style.transform = `translate(${body.position.x - rect.left - rect.width/2}px, ${body.position.y - rect.top - rect.height/2}px) rotate(${body.angle}rad)`;
-                    requestAnimationFrame(update);
-                })();
-            });
-
-            // Add Ground
-            const ground = Bodies.rectangle(window.innerWidth/2, window.innerHeight, window.innerWidth, 60, { isStatic: true });
-            Composite.add(world, ground);
-
-            // Add Mouse Control (Pickup and Drag)
-            const mouse = Mouse.create(document.body);
-            const mouseConstraint = MouseConstraint.create(engine, { mouse: mouse });
-            Composite.add(world, mouseConstraint);
-
-            Runner.run(engine);
         }
 
-        function pushEverythingUp() {
-            const bodies = Composite.allBodies(world);
-            bodies.forEach(body => {
-                if(!body.isStatic) {
-                    Matter.Body.applyForce(body, body.position, { x: 0, y: -0.5 });
-                }
+        function showSuggest() { document.getElementById('cmdSuggestions').style.display = 'flex'; }
+        function hideSuggest() { setTimeout(() => { document.getElementById('cmdSuggestions').style.display = 'none'; }, 200); }
+
+        // --- 2. PHYSICS ENGINE SETUP ---
+        const { Engine, Render, Runner, World, Bodies, Mouse, MouseConstraint, Composite } = Matter;
+        let engine, render, runner;
+        let isPhysicsEnabled = false;
+        let isZeroG = false;
+
+        function initPhysics() {
+            if (engine) return;
+            engine = Engine.create();
+            const container = document.getElementById('physics-container');
+            
+            // Create Ground
+            const ground = Bodies.rectangle(window.innerWidth/2, window.innerHeight + 50, window.innerWidth, 100, { isStatic: true });
+            World.add(engine.world, [ground]);
+
+            // Convert HTML elements to Physics objects
+            const elements = document.querySelectorAll('.physics-element');
+            elements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                const body = Bodies.rectangle(rect.left + rect.width/2, rect.top + rect.height/2, rect.width, rect.height, {
+                    restitution: 0.5, friction: 0.5
+                });
+                body.element = el;
+                World.add(engine.world, body);
+                
+                // Set absolute positioning for physics
+                el.style.position = 'fixed';
+                el.style.width = rect.width + 'px';
+                el.style.margin = '0';
             });
-        }
 
-        // Command Logic
-        input.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter') {
-                const cmd = input.value.toLowerCase();
-                if(cmd === '/physics') {
-                    shatter();
-                    engine.gravity.y = 1;
-                } else if(cmd === '/zerog') {
-                    shatter();
-                    engine.gravity.y = 0;
-                } else if(cmd === '/lowgraphic') {
-                    document.body.classList.toggle('low-graphics');
-                } else if(cmd === '/meteor') {
-                    spawnMeteor();
-                }
-                input.value = '';
-            }
-        });
-
-        function spawnMeteor() {
-            shatter();
-            const meteor = Bodies.circle(Math.random() * window.innerWidth, -100, 40, {
-                density: 0.5,
-                render: { fillStyle: 'red' }
+            // Add Mouse Control (Drag and Throw)
+            const mouse = Mouse.create(container);
+            const mouseConstraint = MouseConstraint.create(engine, {
+                mouse: mouse,
+                constraint: { stiffness: 0.2, render: { visible: false } }
             });
-            // Visual for meteor
-            const mDiv = document.createElement('div');
-            mDiv.innerHTML = "METEOR";
-            mDiv.style.cssText = "position:fixed; background:black; color:white; padding:10px; font-weight:bold; z-index:50;";
-            document.body.appendChild(mDiv);
+            World.add(engine.world, mouseConstraint);
 
-            Composite.add(world, meteor);
-            Matter.Body.setVelocity(meteor, { x: (Math.random() - 0.5) * 20, y: 25 });
-
-            (function updateMeteor() {
-                mDiv.style.left = `${meteor.position.x - 30}px`;
-                mDiv.style.top = `${meteor.position.y - 15}px`;
-                mDiv.style.transform = `rotate(${meteor.angle}rad)`;
-                requestAnimationFrame(updateMeteor);
+            // Update Loop
+            (function update() {
+                elements.forEach((el, i) => {
+                    const body = engine.world.bodies.find(b => b.element === el);
+                    if (body) {
+                        el.style.transform = `translate(${body.position.x - body.positionPrev.x}px, ${body.position.y - body.positionPrev.y}px) rotate(${body.angle}rad)`;
+                        el.style.left = (body.position.x - el.offsetWidth/2) + 'px';
+                        el.style.top = (body.position.y - el.offsetHeight/2) + 'px';
+                    }
+                });
+                Engine.update(engine);
+                requestAnimationFrame(update);
             })();
+        }
+
+        // --- 3. COMMANDS ---
+        function runCmd(cmd) {
+            if (cmd === '/physics') {
+                initPhysics();
+                engine.world.gravity.y = 1;
+            }
+            if (cmd === '/ZeroG') {
+                initPhysics();
+                isZeroG = !isZeroG;
+                engine.world.gravity.y = isZeroG ? 0 : 1;
+            }
+            if (cmd === '/LowGraphic') {
+                document.body.classList.toggle('low-graphics');
+            }
+            if (cmd === '/Meteor') {
+                initPhysics();
+                const meteor = Bodies.circle(Math.random() * window.innerWidth, -100, 50, { density: 0.1 });
+                World.add(engine.world, meteor);
+                Matter.Body.setVelocity(meteor, {x: (Math.random() - 0.5) * 20, y: 15});
+            }
         }
     </script>
 </body>
