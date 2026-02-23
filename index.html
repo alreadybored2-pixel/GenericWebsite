@@ -3,124 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimalist Modern Site</title>
+    <title>Generic Website</title>
     <style>
-        /* Modern Reset & Variables */
         :root {
             --bg: #ffffff;
-            --text: #1a1a1a;
-            --accent: #3b82f6; /* Modern Blue */
-            --gray: #f9fafb;
-            --transition: all 0.3s ease;
+            --text: #000000;
+            --secondary: #666666;
+            --border: #eeeeee;
+            --accent: #0070f3; /* Clean Blue */
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            line-height: 1.6;
-            scroll-behavior: smooth;
+            line-height: 1.5;
+            overflow-x: hidden;
         }
 
-        /* Navigation */
+        /* --- NAVIGATION --- */
         nav {
-            padding: 2rem 10%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 1rem 5%;
         }
 
-        .logo { font-weight: 800; font-size: 1.2rem; letter-spacing: -1px; }
-
-        /* Hero Section */
-        header {
-            padding: 100px 10%;
-            text-align: center;
+        .logo {
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
         }
 
-        h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 800; margin-bottom: 1rem; letter-spacing: -2px; }
-        
-        p.subtitle { font-size: 1.2rem; color: #666; max-width: 600px; margin: 0 auto 2rem auto; }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
 
-        .btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background: var(--text);
-            color: white;
+        .nav-links a {
             text-decoration: none;
-            border-radius: 50px;
+            color: var(--secondary);
+            font-size: 0.9rem;
             font-weight: 500;
             transition: var(--transition);
         }
 
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-
-        /* Grid Section */
-        .container { padding: 50px 10%; }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
+        .nav-links a:hover {
+            color: var(--text);
         }
 
-        .card {
-            background: var(--gray);
+        /* --- HERO --- */
+        header {
+            padding: 15vh 5%;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tag {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        h1 {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 800;
+            line-height: 0.9;
+            letter-spacing: -3px;
+            margin-bottom: 2rem;
+        }
+
+        /* --- CONTENT SECTION --- */
+        .section {
+            padding: 5rem 5%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .content-box {
             padding: 2rem;
-            border-radius: 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .content-box:hover {
+            border-color: var(--text);
+            transform: translateY(-5px);
+        }
+
+        .interactive-btn {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            background: var(--text);
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            border-radius: 2px;
             transition: var(--transition);
         }
 
-        .card:hover { background: #f1f5f9; transform: scale(1.02); }
+        .interactive-btn:hover {
+            background: var(--accent);
+            padding-right: 3rem;
+        }
 
-        .card h3 { margin-bottom: 0.5rem; }
-
-        /* Footer */
+        /* --- FOOTER --- */
         footer {
-            padding: 50px 10%;
-            text-align: center;
-            font-size: 0.9rem;
-            color: #999;
+            padding: 2rem 5%;
+            font-size: 0.8rem;
+            color: var(--secondary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+            .section { grid-template-columns: 1fr; }
+            h1 { letter-spacing: -1px; }
+            .nav-links { display: none; } /* Mobile simplicity */
         }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="logo">GENERIC.</div>
-        <div class="links">
-            <a href="#" style="text-decoration:none; color:inherit; font-weight:500;">Work</a>
+        <div class="logo" onclick="location.reload()">Generic Website</div>
+        <div class="nav-links">
+            <a href="#">Link One</a>
+            <a href="#">Link Two</a>
+            <a href="#">Link Three</a>
+            <a href="#" style="color: var(--accent)">Special Link</a>
         </div>
     </nav>
 
     <header>
-        <h1>Less is more.</h1>
-        <p class="subtitle">A clean, smooth, and modern space for your ideas to live on the web.</p>
-        <a href="#explore" class="btn">Explore More</a>
+        <span class="tag">Standard Header Component</span>
+        <h1>This is a very <br>large heading.</h1>
+        <p style="max-width: 500px; color: var(--secondary);">
+            This website contains standard elements organized in a predictable manner for your viewing convenience. 
+        </p>
+        <a href="#" class="interactive-btn" id="mainButton">Click for Action</a>
     </header>
 
-    <div class="container" id="explore">
-        <div class="grid">
-            <div class="card">
-                <h3>Design</h3>
-                <p>Clean lines and focused typography make for a better user experience.</p>
-            </div>
-            <div class="card">
-                <h3>Speed</h3>
-                <p>Built with minimal code to ensure your site loads instantly on Render.</p>
-            </div>
-            <div class="card">
-                <h3>Responsive</h3>
-                <p>Perfectly optimized for mobile, tablet, and desktop viewing.</p>
-            </div>
+    <div class="section">
+        <div class="content-box">
+            <h3>Standard Box A</h3>
+            <p>This box contains some descriptive text about a feature that is likely very common.</p>
+        </div>
+        <div class="content-box">
+            <h3>Standard Box B</h3>
+            <p>This box is identical to the first one, maintaining a consistent and generic aesthetic.</p>
         </div>
     </div>
 
     <footer>
-        &copy; 2026 Your Name. Built with Render & GitHub.
+        <div>© 2026 Generic Website Corp.</div>
+        <div>Privacy / Terms / Whatever</div>
     </footer>
+
+    <script>
+        // A little hint of interactivity to start
+        const btn = document.getElementById('mainButton');
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            btn.textContent = "Action Performed";
+            setTimeout(() => {
+                btn.textContent = "Click for Action";
+            }, 2000);
+        });
+    </script>
 
 </body>
 </html>
